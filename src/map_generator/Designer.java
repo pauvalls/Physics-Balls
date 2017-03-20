@@ -34,6 +34,8 @@ public class Designer extends JSplitPane {
     // @todo: Cambiar estas listas genéricas por listas de los objetos en concreto
     private ArrayList<Rectangle> obstacles = new ArrayList<>();
     private Rectangle obstacle;
+    private ArrayList<Rectangle> bottlenecks = new ArrayList<>();
+    private Rectangle bottleneck;
     private ArrayList<Point> balls = new ArrayList<>();
     private Point ball;
 
@@ -54,7 +56,7 @@ public class Designer extends JSplitPane {
     private JLabel ballLb;
     private JLabel obsLb;
     private JLabel bottleneckLb;
-    
+
     // Botones del panel de controles
     private JButton openBtn;
     private JButton saveBtn;
@@ -98,11 +100,12 @@ public class Designer extends JSplitPane {
         ballLb.setSize(40, 15);
         ballLb.setLocation(14, 5);
         controlPanel.add(ballLb);
-        
+
         // Botón para seleccionar la bola
         ballBtn = new JButton();
         ballBtn.setSize(40, 40);
         ballBtn.setLocation(15, 20);
+        ballBtn.setEnabled(false);
         ballBtn.setBorder(new RoundedBorder(10));
         ballBtn.setForeground(Color.GRAY);
         ballBtn.setText("Ba");
@@ -112,10 +115,11 @@ public class Designer extends JSplitPane {
                 item = "BALL";
                 ballBtn.setEnabled(false);
                 obsBtn.setEnabled(true);
+                bottleneckBtn.setEnabled(true);
             }
         });
         controlPanel.add(ballBtn);
-        
+
         obsLb = new JLabel("Obstáculo", SwingConstants.CENTER);
         obsLb.setBackground(Color.red);
         obsLb.setSize(60, 15);
@@ -123,22 +127,22 @@ public class Designer extends JSplitPane {
         controlPanel.add(obsLb);
 
         // Botón para seleccionar el obstáculo
-        obsBtn = new JButton();
+        obsBtn = new JButton(new ImageIcon("img/obs.png"));
         obsBtn.setSize(40, 40);
         obsBtn.setLocation(88, 20);
         obsBtn.setBorder(new RoundedBorder(10));
         obsBtn.setForeground(Color.GRAY);
-        obsBtn.setText("Ob");
         obsBtn.setToolTipText("Colocar obstáculos");
         obsBtn.addActionListener((ActionEvent e) -> {
             if (!item.equals("OBSTACLE")) {
                 item = "OBSTACLE";
                 obsBtn.setEnabled(false);
                 ballBtn.setEnabled(true);
+                bottleneckBtn.setEnabled(true);
             }
         });
         controlPanel.add(obsBtn);
-        
+
         bottleneckLb = new JLabel("Semáforo", SwingConstants.CENTER);
         bottleneckLb.setBackground(Color.red);
         bottleneckLb.setSize(60, 15);
@@ -146,19 +150,20 @@ public class Designer extends JSplitPane {
         controlPanel.add(bottleneckLb);
 
         // Botón para seleccionar el semáforo
-        bottleneckBtn = new JButton();
+        bottleneckBtn = new JButton(new ImageIcon("img/bottle.png"));
         bottleneckBtn.setSize(40, 40);
         bottleneckBtn.setLocation(161, 20);
         bottleneckBtn.setBorder(new RoundedBorder(10));
         bottleneckBtn.setForeground(Color.GRAY);
-        bottleneckBtn.setText("Ob");
         bottleneckBtn.setToolTipText("Colocar semáforos");
         bottleneckBtn.addActionListener((ActionEvent e) -> {
-            
+            item = "BOTTLENECK";
+            bottleneckBtn.setEnabled(false);
+            ballBtn.setEnabled(true);
+            obsBtn.setEnabled(true);
         });
         controlPanel.add(bottleneckBtn);
-        
-        
+
         // Botón para modificar la configuración general del mapa
         configBtn = new JButton(new ImageIcon("img/settings.png"));
         configBtn.setSize(186, 40);
@@ -169,7 +174,7 @@ public class Designer extends JSplitPane {
         configBtn.setHorizontalAlignment(SwingConstants.LEFT);
         configBtn.setToolTipText("Configuración general del escenario");
         configBtn.addActionListener((ActionEvent e) -> {
-            
+
         });
         controlPanel.add(configBtn);
 
@@ -218,6 +223,9 @@ public class Designer extends JSplitPane {
                     case "OBSTACLE":
                         obstacles.remove(obstacles.size() - 1);
                         break;
+                    case "BOTTLENECK":
+                        bottlenecks.remove(bottlenecks.size() - 1);
+                        break;
                     default:
                         // nada
                         break;
@@ -242,10 +250,11 @@ public class Designer extends JSplitPane {
         eraseBtn.setToolTipText("Borrar toda la información del escenario");
         eraseBtn.addActionListener((ActionEvent e) -> {
             obstacles.clear();
+            bottlenecks.clear();
             balls.clear();
             undoBtn.setEnabled(false);
             eraseBtn.setEnabled(false);
-            undoBtn.setEnabled(false);
+            saveBtn.setEnabled(false);
             repaint();
         });
         controlPanel.add(eraseBtn);
@@ -262,8 +271,9 @@ public class Designer extends JSplitPane {
         mapPanel.setPreferredSize(new Dimension(1100, 619));
         mapPanel.setBackground(Color.LIGHT_GRAY);
 
-        MouseAdapter ma = new MouseAdapter() {
-
+        MouseAdapter ma;
+        ma = new MouseAdapter() {
+            
             private Point clickPoint;
 
             @Override
@@ -276,6 +286,9 @@ public class Designer extends JSplitPane {
                     case "OBSTACLE":
                         obstacle = null;
                         break;
+                    case "BOTTLENECK":
+                        bottleneck = null;
+                        break;
                     default:
                         // nada
                         break;
@@ -285,21 +298,35 @@ public class Designer extends JSplitPane {
             @Override
             public void mouseDragged(MouseEvent e) {
                 Point dragPoint = e.getPoint();
+                int x, y, width, height;
                 switch (item) {
                     case "BALL":
                         ball = dragPoint;
                         break;
                     case "OBSTACLE":
-                        int x = Math.min(clickPoint.x, dragPoint.x);
-                        int y = Math.min(clickPoint.y, dragPoint.y);
-
-                        int width = Math.max(clickPoint.x, dragPoint.x) - x;
-                        int height = Math.max(clickPoint.y, dragPoint.y) - y;
-
-                        if (obstacle == null) {
-                            obstacle = new Rectangle(x, y, width, height);
-                        } else {
-                            obstacle.setBounds(x, y, width, height);
+                        x = Math.min(clickPoint.x, dragPoint.x);
+                        y = Math.min(clickPoint.y, dragPoint.y);
+                        width = Math.max(clickPoint.x, dragPoint.x) - x;
+                        height = Math.max(clickPoint.y, dragPoint.y) - y;
+                        if (width > 0 && height > 0) {
+                            if (obstacle == null) {
+                                obstacle = new Rectangle(x, y, width, height);
+                            } else {
+                                obstacle.setBounds(x, y, width, height);
+                            }
+                        }
+                        break;
+                    case "BOTTLENECK":
+                        x = Math.min(clickPoint.x, dragPoint.x);
+                        y = Math.min(clickPoint.y, dragPoint.y);
+                        width = Math.max(clickPoint.x, dragPoint.x) - x;
+                        height = Math.max(clickPoint.y, dragPoint.y) - y;
+                        if (width > 0 && height > 0) {
+                            if (bottleneck == null) {
+                                bottleneck = new Rectangle(x, y, width, height);
+                            } else {
+                                bottleneck.setBounds(x, y, width, height);
+                            }
                         }
                         break;
                     default:
@@ -318,8 +345,16 @@ public class Designer extends JSplitPane {
                         ball = null;
                         break;
                     case "OBSTACLE":
-                        obstacles.add(obstacle);
-                        obstacle = null;
+                        if (obstacle != null) {
+                            obstacles.add(obstacle);
+                            obstacle = null;
+                        }
+                        break;
+                    case "BOTTLENECK":
+                        if (bottleneck != null) {
+                            bottlenecks.add(bottleneck);
+                            bottleneck = null;
+                        }
                         break;
                     default:
                         // nada
@@ -342,6 +377,10 @@ public class Designer extends JSplitPane {
 
         // @todo: Habrá que cambiar los pintados por los métodos de pintar de los objetos
         // Pintado de los objetos ya existentes
+        for (Point p : balls) {
+            g.setColor(Color.BLUE);
+            g.fillOval(p.x - radius, p.y - radius, radius * 2, radius * 2);
+        }
         for (Rectangle r : obstacles) {
             g.setColor(Color.RED);
             Graphics2D g2d = (Graphics2D) g.create();
@@ -351,9 +390,14 @@ public class Designer extends JSplitPane {
             g2d = (Graphics2D) g.create();
             g2d.draw(r);
         }
-        for (Point p : balls) {
-            g.setColor(Color.BLUE);
-            g.fillOval(p.x - radius, p.y - radius, radius * 2, radius * 2);
+        for (Rectangle r : bottlenecks) {
+            g.setColor(Color.GREEN);
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setComposite(AlphaComposite.SrcOver.derive(0.8f));
+            g2d.fill(r);
+            g2d.dispose();
+            g2d = (Graphics2D) g.create();
+            g2d.draw(r);
         }
 
         // Pintado del objeto seleccionado
@@ -370,6 +414,17 @@ public class Designer extends JSplitPane {
             g2d.dispose();
             g2d = (Graphics2D) g.create();
             g2d.draw(obstacle);
+            g2d.dispose();
+        }
+        if (bottleneck != null) {
+            //g.setColor(UIManager.getColor("List.obstacleBackground"));
+            g.setColor(Color.GREEN);
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setComposite(AlphaComposite.SrcOver.derive(0.8f));
+            g2d.fill(obstacle);
+            g2d.dispose();
+            g2d = (Graphics2D) g.create();
+            g2d.draw(bottleneck);
             g2d.dispose();
         }
     }
