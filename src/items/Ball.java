@@ -68,7 +68,6 @@ public class Ball extends Thread {
     public void draw(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
         g2d.setColor(color);
         g2d.fillOval((int) (x - radius), (int) (y - radius), (int) radius * 2, (int) radius * 2);
     }
