@@ -22,6 +22,7 @@ public class MapDesigner extends JFrame {
         add(new Designer());
         pack();
         setLocationRelativeTo(null);
+        setResizable(false);
         setVisible(true);
     }
     

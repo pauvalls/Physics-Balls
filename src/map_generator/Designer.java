@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.Stack;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.SwingConstants;
 
 /**
  *
@@ -48,16 +50,27 @@ public class Designer extends JSplitPane {
     private JPanel controlPanel;
     private JPanel mapPanel;
 
+    // Objetos de labels de información
+    private JLabel ballLb;
+    private JLabel obsLb;
+    private JLabel bottleneckLb;
+    
     // Botones del panel de controles
+    private JButton openBtn;
+    private JButton saveBtn;
     private JButton undoBtn;
     private JButton ballBtn;
     private JButton obsBtn;
     private JButton eraseBtn;
+    private JButton bottleneckBtn;
+    private JButton configBtn;
 
     public Designer() throws IOException {
         super(JSplitPane.VERTICAL_SPLIT);
         setDividerSize(0);
 
+        // El tamaño total de la ventana se partirá en los dos contenedores,
+        // El primero de 1100 x 200, el segundo de 1100 x 619
         createControlPanel();
         createMapPanel();
 
@@ -68,24 +81,32 @@ public class Designer extends JSplitPane {
     private void createControlPanel() throws IOException {
         // Botón para cambiar de item
         controlPanel = new JPanel() {
+            // Este método pinta las líneas que hacen de separadores de los paneles
             @Override
             public void paint(Graphics g) {
                 super.paint(g);
-                g.setColor(Color.BLACK);
-                g.fillRect(0, 200, 1000, 3);
-                g.fillRect(503, 0, 3, 200);
+                g.setColor(Color.GRAY);
+                g.fillRect(0, 185, 1100, 3);
+                g.fillRect(503, 0, 3, 185);
             }
         };
-        controlPanel.setPreferredSize(new Dimension(1000, 203));
+        controlPanel.setPreferredSize(new Dimension(1000, 188));
         controlPanel.setLayout(null);
 
-        // Botón para cambiar de item
+        ballLb = new JLabel("Bola", SwingConstants.CENTER);
+        ballLb.setBackground(Color.red);
+        ballLb.setSize(40, 15);
+        ballLb.setLocation(14, 5);
+        controlPanel.add(ballLb);
+        
+        // Botón para seleccionar la bola
         ballBtn = new JButton();
         ballBtn.setSize(40, 40);
-        ballBtn.setLocation(5, 5);
+        ballBtn.setLocation(15, 20);
         ballBtn.setBorder(new RoundedBorder(10));
         ballBtn.setForeground(Color.GRAY);
         ballBtn.setText("Ba");
+        ballBtn.setToolTipText("Colocar bolas");
         ballBtn.addActionListener((ActionEvent e) -> {
             if (!item.equals("BALL")) {
                 item = "BALL";
@@ -94,14 +115,21 @@ public class Designer extends JSplitPane {
             }
         });
         controlPanel.add(ballBtn);
+        
+        obsLb = new JLabel("Obstáculo", SwingConstants.CENTER);
+        obsLb.setBackground(Color.red);
+        obsLb.setSize(60, 15);
+        obsLb.setLocation(79, 5);
+        controlPanel.add(obsLb);
 
-        // Botón para cambiar de item
+        // Botón para seleccionar el obstáculo
         obsBtn = new JButton();
         obsBtn.setSize(40, 40);
-        obsBtn.setLocation(5, 50);
+        obsBtn.setLocation(88, 20);
         obsBtn.setBorder(new RoundedBorder(10));
         obsBtn.setForeground(Color.GRAY);
         obsBtn.setText("Ob");
+        obsBtn.setToolTipText("Colocar obstáculos");
         obsBtn.addActionListener((ActionEvent e) -> {
             if (!item.equals("OBSTACLE")) {
                 item = "OBSTACLE";
@@ -110,14 +138,76 @@ public class Designer extends JSplitPane {
             }
         });
         controlPanel.add(obsBtn);
+        
+        bottleneckLb = new JLabel("Semáforo", SwingConstants.CENTER);
+        bottleneckLb.setBackground(Color.red);
+        bottleneckLb.setSize(60, 15);
+        bottleneckLb.setLocation(150, 5);
+        controlPanel.add(bottleneckLb);
+
+        // Botón para seleccionar el semáforo
+        bottleneckBtn = new JButton();
+        bottleneckBtn.setSize(40, 40);
+        bottleneckBtn.setLocation(161, 20);
+        bottleneckBtn.setBorder(new RoundedBorder(10));
+        bottleneckBtn.setForeground(Color.GRAY);
+        bottleneckBtn.setText("Ob");
+        bottleneckBtn.setToolTipText("Colocar semáforos");
+        bottleneckBtn.addActionListener((ActionEvent e) -> {
+            
+        });
+        controlPanel.add(bottleneckBtn);
+        
+        
+        // Botón para modificar la configuración general del mapa
+        configBtn = new JButton(new ImageIcon("img/settings.png"));
+        configBtn.setSize(186, 40);
+        configBtn.setLocation(15, 80);
+        configBtn.setBorder(new RoundedBorder(10));
+        configBtn.setForeground(Color.BLACK);
+        configBtn.setText("Configuración general");
+        configBtn.setHorizontalAlignment(SwingConstants.LEFT);
+        configBtn.setToolTipText("Configuración general del escenario");
+        configBtn.addActionListener((ActionEvent e) -> {
+            
+        });
+        controlPanel.add(configBtn);
+
+        // Botón de cargar
+        openBtn = new JButton(new ImageIcon("img/open.png"));
+        openBtn.setSize(40, 40);
+        openBtn.setLocation(455, 5);
+        openBtn.setBorder(new RoundedBorder(10));
+        openBtn.setForeground(Color.GRAY);
+        openBtn.setToolTipText("Cargar escenario");
+        openBtn.addActionListener((ActionEvent e) -> {
+            // @todo: Aquí se implementará la persistencia a la base de datos 
+            // del escenario
+        });
+        controlPanel.add(openBtn);
+
+        // Botón de guardar
+        saveBtn = new JButton(new ImageIcon("img/save.png"));
+        saveBtn.setEnabled(false);
+        saveBtn.setSize(40, 40);
+        saveBtn.setLocation(455, 50);
+        saveBtn.setBorder(new RoundedBorder(10));
+        saveBtn.setForeground(Color.GRAY);
+        saveBtn.setToolTipText("Guardar escenario");
+        saveBtn.addActionListener((ActionEvent e) -> {
+            // @todo: Aquí se implementará la persistencia a la base de datos 
+            // del escenario
+        });
+        controlPanel.add(saveBtn);
 
         // Botón de deshacer
         undoBtn = new JButton(new ImageIcon("img/undo.png"));
         undoBtn.setEnabled(false);
         undoBtn.setSize(40, 40);
-        undoBtn.setLocation(455, 110);
+        undoBtn.setLocation(455, 95);
         undoBtn.setBorder(new RoundedBorder(10));
         undoBtn.setForeground(Color.GRAY);
+        undoBtn.setToolTipText("Deshacer última acción");
         undoBtn.addActionListener((ActionEvent e) -> {
             if (!undoList.isEmpty()) {
                 String toUndo = undoList.pop();
@@ -135,6 +225,8 @@ public class Designer extends JSplitPane {
             }
             if (undoList.isEmpty()) {
                 undoBtn.setEnabled(false);
+                eraseBtn.setEnabled(false);
+                saveBtn.setEnabled(false);
             }
             repaint();
         });
@@ -142,12 +234,18 @@ public class Designer extends JSplitPane {
 
         // Botón de borrar al completo
         eraseBtn = new JButton(new ImageIcon("img/erase.png"));
+        eraseBtn.setEnabled(false);
         eraseBtn.setSize(40, 40);
-        eraseBtn.setLocation(455, 155);
+        eraseBtn.setLocation(455, 140);
         eraseBtn.setBorder(new RoundedBorder(10));
         eraseBtn.setForeground(Color.GRAY);
+        eraseBtn.setToolTipText("Borrar toda la información del escenario");
         eraseBtn.addActionListener((ActionEvent e) -> {
-
+            obstacles.clear();
+            balls.clear();
+            undoBtn.setEnabled(false);
+            eraseBtn.setEnabled(false);
+            undoBtn.setEnabled(false);
             repaint();
         });
         controlPanel.add(eraseBtn);
@@ -161,8 +259,8 @@ public class Designer extends JSplitPane {
                 paintMap(g);
             }
         };
-        mapPanel.setPreferredSize(new Dimension(666, 500));
-        mapPanel.setBackground(Color.GRAY);
+        mapPanel.setPreferredSize(new Dimension(1100, 619));
+        mapPanel.setBackground(Color.LIGHT_GRAY);
 
         MouseAdapter ma = new MouseAdapter() {
 
@@ -228,6 +326,8 @@ public class Designer extends JSplitPane {
                         break;
                 }
                 undoBtn.setEnabled(true);
+                eraseBtn.setEnabled(true);
+                saveBtn.setEnabled(true);
                 mapPanel.repaint();
             }
 
