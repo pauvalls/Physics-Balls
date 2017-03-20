@@ -7,10 +7,11 @@ package items;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import physicballs.Space;
-import rules.SpaceRules;
 
 /**
  *
@@ -26,9 +27,9 @@ public class Ball extends Thread {
 
     protected float radius;
     protected float mass;
-    
+
     protected boolean active = true;
-    
+
     protected Color color;
 
     protected Space parent;
@@ -65,8 +66,11 @@ public class Ball extends Thread {
      *
      */
     public void draw(Graphics g) {
-        g.setColor(color);
-        g.fillOval((int) (x - radius), (int) (y - radius), (int) radius * 2, (int) radius * 2);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        g2d.setColor(color);
+        g2d.fillOval((int) (x - radius), (int) (y - radius), (int) radius * 2, (int) radius * 2);
     }
 
     /**
@@ -151,10 +155,9 @@ public class Ball extends Thread {
     public void setColor(Color color) {
         this.color = color;
     }
-    
-    public void stopBall(){
+
+    public void stopBall() {
         active = false;
-    } 
-    
+    }
 
 }
