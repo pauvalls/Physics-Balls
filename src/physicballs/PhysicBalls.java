@@ -23,7 +23,7 @@ public class PhysicBalls extends JFrame {
     private Container content;
     private Server server;
     private Space space = new Space(650, 400, 10);
-
+    String prueba;
     /**
      * Constructor
      */
